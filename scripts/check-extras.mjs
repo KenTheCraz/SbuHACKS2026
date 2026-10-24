@@ -12,3 +12,10 @@ assert.equal(c.studyDay(history,'2026-10-25').difference,-9000000);
 assert.equal(c.studyDay({},'2026-10-24').difference,0);
 assert.equal(c.dayKey(c.studyDay({},'2026-01-01').previous),'2025-12-31');
 console.log('Two-month history boundaries and selected-day comparisons passed.');
+
+const original={...c.fresh(),daily:{'2026-10-24':3600000},sessionMs:3600000,status:'paused'};
+const newSession=c.startSession(original,start);
+assert.equal(newSession.startedAt,start);assert.equal(newSession.checkpoint,start);assert.equal(newSession.sessionMs,0);assert.equal(newSession.status,'running');assert.equal(newSession.daily['2026-10-24'],3600000);assert.equal(original.sessionMs,3600000);
+const progressed=c.reconcile(newSession,start+60000,7200000);assert.equal(progressed.startedAt,start);assert.equal(progressed.sessionMs,60000);
+progressed.status='paused';const paused=c.reconcile(progressed,start+120000,7200000);assert.equal(paused.startedAt,start);assert.equal(paused.sessionMs,60000);
+console.log('New session resets timer, preserves history, and keeps its original start timestamp.');
