@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs && node scripts/server.mjs --local",
-    "test": "node check-extraction.cjs && node check-priority.cjs && node scripts/check-companion.mjs",
+    "test": "node check-extraction.cjs && node check-priority.cjs && node scripts/check-companion.mjs && node scripts/check-calendar.mjs",
     "test:live": "node scripts/check-companion.mjs --live",
     "start": "node scripts/server.mjs",
     "deploy:cloudflare": "npx wrangler deploy"

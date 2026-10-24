@@ -3,6 +3,7 @@
 A standalone browser-based to-do app. No ChatGPT account, login, or hosting is required.
 
 - Turn screenshots into editable tasks, descriptions, and possible due dates.
+- View due dates in a monthly calendar, browse upcoming tasks, and edit tasks from any day.
 - Organize tasks in Academic, Extracurricular, Work, or custom categories.
 - Suggest High / Mid / Low priority from description keywords, with manual overrides.
 - Ask Leaf for a next step or to edit names, dates, priorities, descriptions, categories, or task order. Undo the latest companion change.
