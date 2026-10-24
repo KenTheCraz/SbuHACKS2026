@@ -5,11 +5,16 @@ const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:
 const limits=new Map();
 export async function companion(request,env){
  if(request.method!=='POST')return json({error:'Use POST.'},405);
- if(!request.headers.get('oai-authenticated-user-id'))return json({error:'Please sign in to use your companion.'},401);
  if(request.headers.get('origin')!==new URL(request.url).origin)return json({error:'Request origin not allowed.'},403);
+ if(!env.APP_ACCESS_CODE)return json({error:'Leaf is not configured yet. The site owner needs to set an access code.'},503);
+ const provided=request.headers.get('x-leaf-access-code')||'';
+ const expectedHash=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(env.APP_ACCESS_CODE)));
+ const providedHash=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(provided)));
+ let mismatch=0;for(let i=0;i<expectedHash.length;i++)mismatch|=expectedHash[i]^providedHash[i];
+ if(mismatch)return json({error:'Enter the correct Leaf access code to continue.'},401);
  if(!env.OPENAI_API_KEY)return json({error:'Your AI connection is not configured.'},503);
  if(!request.headers.get('content-type')?.includes('application/json'))return json({error:'Expected JSON.'},415);
- const user=request.headers.get('oai-authenticated-user-id'),now=Date.now();let bucket=limits.get(user);if(!bucket||now-bucket.at>60000){bucket={at:now,n:0};limits.set(user,bucket)}if(++bucket.n>20)return json({error:'Please wait a minute before sending more messages.'},429);if(limits.size>1000)for(const [k,v]of limits)if(now-v.at>60000)limits.delete(k);
+ const user='shared-companion',now=Date.now();let bucket=limits.get(user);if(!bucket||now-bucket.at>60000){bucket={at:now,n:0};limits.set(user,bucket)}if(++bucket.n>20)return json({error:'Please wait a minute before sending more messages.'},429);if(limits.size>1000)for(const [k,v]of limits)if(now-v.at>60000)limits.delete(k);
  try{
  const raw=await request.text();if(raw.length>180000)return json({error:'Your task list is too large for one conversation. Shorten descriptions and try again.'},413);const data=JSON.parse(raw);
  if(typeof data.message!=='string'||!data.message.trim()||data.message.length>4000||!Array.isArray(data.tasks)||data.tasks.length>200||!Array.isArray(data.cats)||data.cats.length>100)return json({error:'Please send a message and a list of up to 200 tasks.'},400);
