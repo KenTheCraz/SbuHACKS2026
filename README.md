@@ -3,6 +3,7 @@
 A standalone browser-based to-do app. No ChatGPT account, login, or hosting is required.
 
 - Open Home for today’s weather, a city picker, °F/°C units, and upcoming/overdue deadline notifications.
+- Quickly capture phrases such as “Chemistry report Friday” or “Read in 3 days”, then review the suggested name and date before saving.
 - Turn screenshots into editable tasks, descriptions, and possible due dates.
 - View due dates in a monthly calendar, browse upcoming tasks, and edit tasks from any day.
 - Organize tasks in Academic, Extracurricular, Work, or custom categories.
