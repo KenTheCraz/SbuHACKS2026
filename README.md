@@ -5,7 +5,7 @@ A standalone browser-based to-do app. No ChatGPT account, login, or hosting is r
 - Open Extras for Lock-ins study logging, configurable break reminders, a daily heatmap, and a fullscreen countdown with a ring.
 - Open Home for today’s weather, a city picker, °F/°C units, and upcoming/overdue deadline notifications.
 - Quickly capture phrases such as “Chemistry report Friday” or “Read in 3 days”, then review the suggested name and date before saving.
-- Turn screenshots into editable tasks, descriptions, and possible due dates.
+- Import images or multipage PDFs into editable tasks, descriptions, and possible due dates.
 - View due dates in a monthly calendar, browse upcoming tasks, and edit tasks from any day.
 - Organize tasks in Academic, Extracurricular, Work, or custom categories.
 - Suggest High / Mid / Low priority from description keywords, with manual overrides.
@@ -80,3 +80,5 @@ Tasks are stored in the current browser/device, separately for each website orig
 Weather uses Open-Meteo’s forecast and geocoding APIs, with attribution on Home. Stony Brook is the default city; location and unit preferences are stored in your browser. No weather API key or device-location permission is required. Review Open-Meteo’s usage terms for commercial deployments.
 
 Lock-ins and countdowns use saved timestamps so background throttling does not lose elapsed time. Study time continues until paused/ended and is split at local midnight; breaks do not add study time. Settings → Lock-ins defaults to a break suggestion after 120 minutes and a 20-minute break. History and active timers are saved in the browser. Keep the browser open for countdown audio; browsers or operating systems can suspend pages or mute audio, delaying the ring until the page resumes. Timers do not send system notifications. Concurrent tabs coordinate lock-in updates using the Web Locks API when supported.
+
+Uploads accept common browser-readable image formats (PNG, JPEG, WebP, GIF, BMP, AVIF, SVG, and others the browser can decode) and PDFs. HEIC/HEIF and TIFF depend on browser support; unsupported files receive a conversion message. Animated images use one frame. Files are limited to 30 MB; PDFs to 25 pages. PDF.js reads selectable text directly and Tesseract OCR reads scanned pages. Duplicate task suggestions across pages are merged by name/date. Locked PDFs must be unlocked first. All file parsing and OCR run locally in the browser; runtime libraries are fetched through fixed proxy routes.
