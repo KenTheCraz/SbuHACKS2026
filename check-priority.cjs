@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const p=require('./scripts/load-browser.cjs')('./web/priority.js','TaskPriority');
+for(const text of ['Urgent: submit the report ASAP','Required for our launch','Final exam, worth 40% of my grade'])assert.equal(p.suggest(text).level,'high');
+for(const text of ['Optional extra credit','No rush; can wait','Not urgent, do whenever'])assert.equal(p.suggest(text).level,'low');
+assert.equal(p.suggest('Not required, just optional').level,'low');assert.equal(p.suggest('Read chapters 2 and 3').level,'mid');assert.equal(p.suggest('').level,'mid');
+assert.equal(p.effective({description:'Urgent',priority:'low'}),'low');assert.equal(p.effective({title:'Old saved task'}),'mid');
+let tasks=[{title:'low',description:'Optional'},{title:'complete',done:true,description:'urgent'},{title:'mid',description:''},{title:'high',description:'mandatory'}];assert.deepEqual(tasks.sort(p.compare).map(t=>t.title),['high','mid','low','complete']);
+assert.equal(p.compare({description:'Urgent',date:'2026-10-25'},{description:'Urgent',date:'2026-10-30'}),-1);
+const html=fs.readFileSync('web/index.html','utf8');const code=html.split('<script>').at(-1).split('</script>')[0];new vm.Script(code);assert.ok(html.includes('id="description"'));assert.ok(code.includes('description,priority'));assert.ok(code.includes('TaskPriority.compare(a,b)'));
+const extract=require('./scripts/load-browser.cjs')('./web/extract.js','TaskExtract').extract;const r=extract('Title: Design mockup\nDescription: Urgent, required for launch\nDue: October 30, 2026');assert.equal(r.length,1);assert.match(r[0].description,/Urgent/);assert.equal(p.suggest(r[0].description).level,'high');
+console.log('Priority inference, manual override, sorting, old task compatibility, import descriptions, and app syntax passed.');
