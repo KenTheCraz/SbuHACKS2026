@@ -1,3 +1,14 @@
 import assert from 'node:assert/strict';import vm from 'node:vm';import fs from 'node:fs';const ctx={};vm.createContext(ctx);vm.runInContext(fs.readFileSync('web/extras-core.js','utf8'),ctx);const c=ctx.ExtrasCore,start=new Date(2026,9,24,23,30).getTime();let s=c.fresh();s.status='running';s.checkpoint=start;s=c.reconcile(s,start+3*3600000,2*3600000);assert.equal(s.sessionMs,3*3600000);assert.equal(s.daily['2026-10-24'],30*60000);assert.equal(s.daily['2026-10-25'],150*60000);assert.equal(s.reminderDue,true);const same=c.reconcile(s,start+3*3600000,2*3600000);assert.equal(same.sessionMs,s.sessionMs);s.status='paused';assert.equal(c.reconcile(s,start+5*3600000,2*3600000).sessionMs,s.sessionMs);s.status='break';s.breakUntil=start+6*3600000;s=c.reconcile(s,start+7*3600000,2*3600000);assert.equal(s.status,'paused');assert.equal(s.breakReady,true);assert.equal(s.sessionMs,3*3600000);assert.equal(c.remaining(5000,4999),1000);assert.equal(c.remaining(5000,6000),0);assert.equal(c.duration(7322000),'02:02:02');
 // Timestamp reconciliation across a long throttled/background gap, without tick counting.
 let b=c.fresh();b.status='running';b.checkpoint=start;assert.equal(c.reconcile(b,start+125000,7200000).sessionMs,125000);assert.equal(c.reconcile(b,start-1000,7200000).sessionMs,0);console.log('Lock-in timestamp accounting, midnight split, pause/break exclusions, reminder threshold, no duplicate accrual, background gap, and countdown rounding passed.');
+
+// Two calendar months, clamped at month-end, including leap years and year boundaries.
+assert.equal(c.dayKey(c.historyStart(new Date(2026,3,30,12))),'2026-02-28');
+assert.equal(c.dayKey(c.historyStart(new Date(2024,3,30,12))),'2024-02-29');
+assert.equal(c.dayKey(c.historyStart(new Date(2026,0,15,12))),'2025-11-15');
+const history={'2026-10-23':3600000,'2026-10-24':9000000};
+assert.equal(c.studyDay(history,'2026-10-24').difference,5400000);
+assert.equal(c.studyDay(history,'2026-10-25').difference,-9000000);
+assert.equal(c.studyDay({},'2026-10-24').difference,0);
+assert.equal(c.dayKey(c.studyDay({},'2026-01-01').previous),'2025-12-31');
+console.log('Two-month history boundaries and selected-day comparisons passed.');
