@@ -1,0 +1,6 @@
+async function fetchHomeWeather(location,unit){
+ const q=new URLSearchParams({lat:String(location.latitude),lon:String(location.longitude),unit});
+ try{const r=await fetch('/api/weather?'+q,{signal:AbortSignal.timeout(8000)});if(r.ok){const data=await r.json();if(Number.isFinite(data.temperature))return data}}catch{}
+ const upstream=new URL('https://api.open-meteo.com/v1/forecast');upstream.search=new URLSearchParams({latitude:String(location.latitude),longitude:String(location.longitude),current:'temperature_2m,weather_code,is_day',daily:'temperature_2m_max,temperature_2m_min',temperature_unit:unit==='c'?'celsius':'fahrenheit',timezone:'auto',forecast_days:'1'});
+ const r=await fetch(upstream,{signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('Weather provider is temporarily unavailable. Please retry.');const d=await r.json();if(!Number.isFinite(d.current?.temperature_2m)||!Number.isFinite(d.daily?.temperature_2m_max?.[0])||!Number.isFinite(d.daily?.temperature_2m_min?.[0]))throw Error('Weather data is incomplete. Please retry.');return {temperature:d.current.temperature_2m,code:d.current.weather_code,isDay:d.current.is_day,high:d.daily.temperature_2m_max[0],low:d.daily.temperature_2m_min[0],time:d.current.time,timezone:d.timezone,unit:unit==='c'?'°C':'°F'};
+}
