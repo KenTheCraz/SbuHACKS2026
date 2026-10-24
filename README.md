@@ -2,6 +2,7 @@
 
 A standalone browser-based to-do app. No ChatGPT account, login, or hosting is required.
 
+- Open Home for today’s weather, a city picker, °F/°C units, and upcoming/overdue deadline notifications.
 - Turn screenshots into editable tasks, descriptions, and possible due dates.
 - View due dates in a monthly calendar, browse upcoming tasks, and edit tasks from any day.
 - Organize tasks in Academic, Extracurricular, Work, or custom categories.
@@ -73,3 +74,5 @@ Default tests use mocked AI responses and require no secrets. Build output is `d
 ## Current limits
 
 Tasks are stored in the current browser/device, separately for each website origin. Tasks from the old ChatGPT-hosted URL do not automatically appear on the new URL. Extraction and automatic priority use rules; Leaf uses the OpenAI API. Task data and conversation are shared with OpenAI only when a message is sent. OCR assets are fetched through fixed proxy routes. Companion requests support up to 200 tasks. Rate limiting is best-effort per server instance, not a global spending cap. Configure API usage limits for a shared deployment.
+
+Weather uses Open-Meteo’s forecast and geocoding APIs, with attribution on Home. Stony Brook is the default city; location and unit preferences are stored in your browser. No weather API key or device-location permission is required. Review Open-Meteo’s usage terms for commercial deployments.
