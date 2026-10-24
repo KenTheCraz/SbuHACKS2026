@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const context=vm.createContext({});
+vm.runInContext(fs.readFileSync('web/priority.js','utf8'),context);
+vm.runInContext(fs.readFileSync('web/reorder.js','utf8').split('const reorderHelp=')[0],context);
+const reorder=(...args)=>JSON.parse(JSON.stringify(context.TaskReorder.reorder(...args)));
+const state={tasks:['a','b','c','d'].map(id=>({id,description:''}))};
+assert.deepEqual(reorder(state,['a','b','c','d'],'a','c',true),['b','c','a','d']);
+assert.deepEqual(reorder(state,['a','c'],'c','a'),['c','b','a','d']);
+assert.deepEqual(reorder({...state,customOrder:['d','c','b','a']},['d','c','b','a'],'a','d'),['a','d','c','b']);
+assert.equal(reorder({...state,tasks:state.tasks.map(t=>({...t,done:t.id==='d'}))},['a','b','c','d'],'a','d'),null);
+assert.equal(reorder(state,['b','c'],'a','b'),null);
+assert.deepEqual(reorder({...state,customOrder:['missing','a','a','b']},['a','b','c','d'],'b','a'),['b','a','c','d']);
+console.log('Manual ordering, filtered category positions, completed-task boundaries, and saved-order cleanup passed.');
