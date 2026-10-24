@@ -2,7 +2,7 @@
 function fresh(){return {status:'idle',startedAt:0,previousSession:null,checkpoint:0,sessionMs:0,blockMs:0,daily:{},breakUntil:0,breakReady:false,reminderDue:false}}
 function endSession(state,now){const previousSession=state.status!=='idle'?{startedAt:state.startedAt||null,endedAt:now,durationMs:state.sessionMs}:state.previousSession||null;return {...fresh(),daily:{...state.daily},previousSession}}
 function startSession(state,now){return {...endSession(state,now),status:'running',startedAt:now,checkpoint:now}}
-function studyMilestone(daily,today){return studyDay(daily,dayKey(today)).difference>=30*60000}
+function studyMilestone(daily,today){return studyDay(daily,dayKey(today)).difference>=2*60000}
 function dayKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function reconcile(state,now,interval){const s=JSON.parse(JSON.stringify(state));if(s.status==='running'){let cursor=s.checkpoint||now,end=Math.max(cursor,now);s.sessionMs+=end-cursor;s.blockMs+=end-cursor;while(cursor<end){const d=new Date(cursor),next=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).getTime(),stop=Math.min(end,next);s.daily[dayKey(d)]=(s.daily[dayKey(d)]||0)+stop-cursor;cursor=stop}s.checkpoint=end;if(s.blockMs>=interval)s.reminderDue=true}if(s.status==='break'&&now>=s.breakUntil){s.status='paused';s.breakReady=true;s.breakUntil=0}return s}
 function duration(ms){const seconds=Math.max(0,Math.floor(ms/1000));return [Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(v=>String(v).padStart(2,'0')).join(':')}
