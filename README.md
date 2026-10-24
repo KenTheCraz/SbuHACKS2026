@@ -2,6 +2,7 @@
 
 A standalone browser-based to-do app. No ChatGPT account, login, or hosting is required.
 
+- Open Extras for Lock-ins study logging, configurable break reminders, a daily heatmap, and a fullscreen countdown with a ring.
 - Open Home for today’s weather, a city picker, °F/°C units, and upcoming/overdue deadline notifications.
 - Quickly capture phrases such as “Chemistry report Friday” or “Read in 3 days”, then review the suggested name and date before saving.
 - Turn screenshots into editable tasks, descriptions, and possible due dates.
@@ -77,3 +78,5 @@ Default tests use mocked AI responses and require no secrets. Build output is `d
 Tasks are stored in the current browser/device, separately for each website origin. Tasks from the old ChatGPT-hosted URL do not automatically appear on the new URL. Extraction and automatic priority use rules; Leaf uses the OpenAI API. Task data and conversation are shared with OpenAI only when a message is sent. OCR assets are fetched through fixed proxy routes. Companion requests support up to 200 tasks. Rate limiting is best-effort per server instance, not a global spending cap. Configure API usage limits for a shared deployment.
 
 Weather uses Open-Meteo’s forecast and geocoding APIs, with attribution on Home. Stony Brook is the default city; location and unit preferences are stored in your browser. No weather API key or device-location permission is required. Review Open-Meteo’s usage terms for commercial deployments.
+
+Lock-ins and countdowns use saved timestamps so background throttling does not lose elapsed time. Study time continues until paused/ended and is split at local midnight; breaks do not add study time. Settings → Lock-ins defaults to a break suggestion after 120 minutes and a 20-minute break. History and active timers are saved in the browser. Keep the browser open for countdown audio; browsers or operating systems can suspend pages or mute audio, delaying the ring until the page resumes. Timers do not send system notifications. Concurrent tabs coordinate lock-in updates using the Web Locks API when supported.
