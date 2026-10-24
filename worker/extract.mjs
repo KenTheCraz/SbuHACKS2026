@@ -4,8 +4,6 @@ export async function extractAssignments(request,env){
  const reply=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'private,no-store'}});
  if(request.method!=='POST')return reply({error:'Use POST.'},405);
  if(request.headers.get('origin')!==new URL(request.url).origin)return reply({error:'Request origin not allowed.'},403);
- if(!env.APP_ACCESS_CODE)return reply({error:'Leaf access code is not configured on this server.'},503);
- const supplied=request.headers.get('x-leaf-access-code')||'';const a=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(env.APP_ACCESS_CODE))),b=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(supplied)));let difference=0;for(let i=0;i<a.length;i++)difference|=a[i]^b[i];if(difference)return reply({error:'Enter your Leaf access code to use AI extraction.'},401);
  if(!env.GROQ_API_KEY)return reply({error:'The server needs GROQ_API_KEY to use Leaf extraction. You can use on-device extraction instead.'},503);
  if(!request.headers.get('content-type')?.includes('application/json'))return reply({error:'Expected JSON.'},415);
  const now=Date.now();let bucket=extractLimits.get('app');if(!bucket||now-bucket.at>=60000){bucket={at:now,n:0};extractLimits.set('app',bucket)}if(++bucket.n>40)return reply({error:'Extraction limit reached. Wait a minute before retrying.'},429);

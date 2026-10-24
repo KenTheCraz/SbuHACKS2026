@@ -14,5 +14,3 @@ services:
         value: "1"
       - key: GROQ_API_KEY
         sync: false
-      - key: APP_ACCESS_CODE
-        generateValue: true

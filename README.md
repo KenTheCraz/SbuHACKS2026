@@ -23,17 +23,17 @@ npm run dev
 
 Open `http://127.0.0.1:8765` in Chrome, Safari, Firefox, or Edge. Normal task features work without any credentials.
 
-For Leaf, copy `.env.example` to `.env.local` and set `GROQ_API_KEY` and a long random `APP_ACCESS_CODE`. Restart the server, open **Ask Leaf**, and enter that access code. The code stays in memory for the browser session; your API key stays server-side. Never commit either secret. Groq offers a rate-limited free tier; account limits still apply.
+For Leaf, copy `.env.example` to `.env.local` and set `GROQ_API_KEY`. Restart the server and open **Ask Leaf**. No visitor access code is required; your API key stays server-side. Never commit the API key. Groq offers a rate-limited free tier; account limits still apply.
 
 ## Deploy on Render
 
 1. Sign in at https://dashboard.render.com and choose **New → Blueprint**.
 2. Connect this repository and select the `taskleaf` branch. Render reads `render.yaml`.
-3. Supply `GROQ_API_KEY` when prompted. The blueprint generates a random `APP_ACCESS_CODE`.
+3. Supply `GROQ_API_KEY` when prompted.
 4. Deploy. Open the `onrender.com` URL from your service dashboard in any browser.
-5. Find `APP_ACCESS_CODE` in the service environment settings and use it to unlock Leaf. Share this code only with people allowed to use your API account.
+5. Open Leaf or choose Leaf AI extraction. No visitor access code is required.
 
-Normal task features are public. Leaf is protected by the access code. Deployment must be completed in your own hosting account; pushing this repository alone does not create a live URL. Your API key and runtime secrets from the old host are not copied automatically.
+Normal task features are public. Leaf is publicly available and protected by request limits. Deployment must be completed in your own hosting account; pushing this repository alone does not create a live URL. Your API key and runtime secrets from the old host are not copied automatically.
 
 ## Deploy on Cloudflare Workers
 
@@ -44,7 +44,6 @@ Alternatively, after signing in with Wrangler:
 ```sh
 npx wrangler login
 npx wrangler secret put GROQ_API_KEY
-npx wrangler secret put APP_ACCESS_CODE
 npm run deploy:cloudflare
 ```
 
@@ -52,7 +51,7 @@ Enter the secrets only into the terminal prompts or the hosting dashboard. The r
 
 ## Other Node hosts
 
-Use build command `npm run build` and start command `npm start`. The server listens on `0.0.0.0` and the host-provided `PORT` (default `8765`). Supply the two secrets through your hosting settings. If running behind a trusted HTTPS reverse proxy, set `TRUST_PROXY=1` or set `PUBLIC_ORIGIN` to the complete public HTTPS origin. Serve the app over HTTPS.
+Use build command `npm run build` and start command `npm start`. The server listens on `0.0.0.0` and the host-provided `PORT` (default `8765`). Supply `GROQ_API_KEY` through your hosting settings. If running behind a trusted HTTPS reverse proxy, set `TRUST_PROXY=1` or set `PUBLIC_ORIGIN` to the complete public HTTPS origin. Serve the app over HTTPS.
 
 ## Checks and build
 
@@ -68,7 +67,7 @@ Default tests use mocked AI responses and require no secrets. Build output is `d
 ## Source layout
 
 - `web/`: UI, OCR extraction, description-based priority rules, companion controls.
-- `worker/api.mjs`: Groq integration with same-origin and access-code checks.
+- `worker/api.mjs`: Groq integration with same-origin checks and request limits.
 - `scripts/server.mjs`: standalone Node HTTP server.
 - `scripts/build.mjs`: embeds the browser assets in a portable Worker.
 - `wrangler.jsonc` and `render.yaml`: independent deployment configuration.
@@ -83,4 +82,6 @@ Lock-ins and countdowns use saved timestamps so background throttling does not l
 
 Uploads accept common browser-readable image formats (PNG, JPEG, WebP, GIF, BMP, AVIF, SVG, and others the browser can decode) and PDFs. HEIC/HEIF and TIFF depend on browser support; unsupported files receive a conversion message. Animated images use one frame. Files are limited to 30 MB; PDFs to 25 pages. PDF.js reads selectable text directly and Tesseract OCR reads scanned pages. Duplicate task suggestions across pages are merged by name/date. Locked PDFs must be unlocked first. On-device extraction keeps files in the browser. Leaf AI extraction sends rendered page images and extracted text to Groq, using up to two pages per request. Results include task names, descriptions, possible due dates, and source evidence for review. Uncertain dates remain blank. Runtime libraries are fetched through fixed proxy routes.
 
-Leaf chat now uses Groq (`openai/gpt-oss-20b`); AI extraction uses Groq vision (`qwen/qwen3.8-27b`). These are Groq model IDs and do not require an OpenAI API account. Optional server settings `GROQ_CHAT_MODEL` and `GROQ_VISION_MODEL` can override them. Keep `GROQ_API_KEY` in server environment secrets, and keep `APP_ACCESS_CODE` configured. For an existing Render service, add `GROQ_API_KEY` manually in its Environment settings before redeploying; changing the repository does not transfer local secrets. The upload dialog lets users choose Leaf AI or on-device extraction and retry a selected file. AI extraction and chat are validated before any tasks are saved.
+Leaf chat now uses Groq (`openai/gpt-oss-20b`); AI extraction uses Groq vision (`qwen/qwen3.8-27b`). These are Groq model IDs and do not require an OpenAI API account. Optional server settings `GROQ_CHAT_MODEL` and `GROQ_VISION_MODEL` can override them. Keep `GROQ_API_KEY` in server environment secrets. No `APP_ACCESS_CODE` is needed. For an existing Render service, add `GROQ_API_KEY` manually in its Environment settings before redeploying; changing the repository does not transfer local secrets. The upload dialog lets users choose Leaf AI or on-device extraction and retry a selected file. AI extraction and chat are validated before any tasks are saved.
+
+Leaf chat and AI extraction are available to all visitors without an access code. The server keeps Groq credentials private and retains shared per-instance request limits (20 chat requests/minute, 40 extraction batches/minute), payload validation, and same-origin browser checks. These limits reduce abuse but are not a global spending cap; all visitors share the account quota. Old APP_ACCESS_CODE environment values are ignored and can be removed.
