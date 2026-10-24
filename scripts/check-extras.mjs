@@ -27,3 +27,11 @@ assert.equal(c.studyMilestone({'2026-10-23':3600000,'2026-10-24':5399999},new Da
 assert.equal(c.studyMilestone({'2026-10-23':3600000,'2026-10-24':5400000},new Date(2026,9,24)),true);
 assert.equal(c.studyMilestone({},new Date(2026,9,24)),false);
 console.log('Previous-session archive, restart preservation, and 30-minute milestone boundary passed.');
+
+let rotation=c.celebrationForDay(null,'2026-10-24');assert.equal(rotation.index,0);
+assert.equal(c.celebrationForDay(rotation,'2026-10-24').index,0);
+for(let i=1;i<=5;i++){rotation=c.celebrationForDay(rotation,`2026-10-${24+i}`);assert.equal(rotation.index,i%5)}
+assert.equal(c.celebrationForDay({index:-1},'2026-10-24').index,0);
+assert.match(c.celebrationMessage(0,35).body,/35 minutes/);
+assert.equal(c.celebrationMessage(4,30).title,'Progress looks good on you! 🎉💚');
+console.log('Celebration rotation stays stable within a day, advances on new milestones, wraps after five, and fills minutes.');
