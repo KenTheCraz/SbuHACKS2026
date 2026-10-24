@@ -25,6 +25,12 @@ Open `http://127.0.0.1:8765` in Chrome, Safari, Firefox, or Edge. Normal task fe
 
 For Leaf, copy `.env.example` to `.env.local` and set `GROQ_API_KEY`. Restart the server and open **Ask Leaf**. No visitor access code is required; your API key stays server-side. Never commit the API key. Groq offers a rate-limited free tier; account limits still apply.
 
+### Ask Leaf connection and study advice
+
+In Ask Leaf, choose an optional study level (elementary, middle, high school, college, or graduate) and tell Leaf your subject, goal, and available time. Leaf uses this context to suggest study strategies; recommendations do not edit tasks unless you request edits.
+
+If Ask Leaf reports that it needs a server connection, the running server is missing `GROQ_API_KEY`. A GitHub sign-in does not configure the AI provider. For local development, copy `.env.example` to `.env.local`, set your Groq API key there, and restart `npm run dev`. For Render, add `GROQ_API_KEY` in the service’s Environment settings and restart/redeploy. For Cloudflare, run `npx wrangler secret put GROQ_API_KEY` for the deployed Worker. Keep the key on the server; never commit it or enter it into Ask Leaf. A missing key cannot be repaired by a browser refresh or a code push alone.
+
 ## Deploy on Render
 
 1. Sign in at https://dashboard.render.com and choose **New → Blueprint**.
