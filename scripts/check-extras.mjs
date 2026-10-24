@@ -23,7 +23,7 @@ console.log('New session resets timer, preserves history, and keeps its original
 const completed=c.endSession(progressed,start+180000);assert.equal(completed.previousSession.durationMs,60000);assert.equal(completed.previousSession.startedAt,start);assert.equal(completed.previousSession.endedAt,start+180000);assert.equal(completed.status,'idle');
 const restarted=c.startSession(completed,start+200000);assert.equal(restarted.previousSession.durationMs,60000);assert.equal(restarted.sessionMs,0);assert.equal(restarted.daily['2026-10-24'],progressed.daily['2026-10-24']);
 const replaced=c.startSession(progressed,start+300000);assert.equal(replaced.previousSession.durationMs,60000);
-assert.equal(c.studyMilestone({'2026-10-23':3600000,'2026-10-24':3719999},new Date(2026,9,24)),false);
-assert.equal(c.studyMilestone({'2026-10-23':3600000,'2026-10-24':3720000},new Date(2026,9,24)),true);
+assert.equal(c.studyMilestone({'2026-10-23':3600000,'2026-10-24':5399999},new Date(2026,9,24)),false);
+assert.equal(c.studyMilestone({'2026-10-23':3600000,'2026-10-24':5400000},new Date(2026,9,24)),true);
 assert.equal(c.studyMilestone({},new Date(2026,9,24)),false);
-console.log('Previous-session archive, restart preservation, and 2-minute milestone boundary passed.');
+console.log('Previous-session archive, restart preservation, and 30-minute milestone boundary passed.');
