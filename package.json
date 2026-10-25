@@ -9,7 +9,8 @@
     "test:live": "node scripts/check-companion.mjs --live",
     "start": "node scripts/server.mjs",
     "deploy:cloudflare": "npx wrangler deploy",
-    "test:vision": "node scripts/check-ai-extraction.mjs --live"
+    "test:vision": "node scripts/check-ai-extraction.mjs --live",
+    "prebuild": "npm ci --ignore-scripts"
   },
   "engines": {
     "node": ">=22.13.0"

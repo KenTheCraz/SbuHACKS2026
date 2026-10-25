@@ -37,6 +37,7 @@ export function createAuth(store,{secure=true}={}){
    if(request.method==='GET')return json(await store.read(user.id));
    if(request.method==='PUT'){
     let body;try{body=await request.json()}catch{return json({error:'Invalid account data.'},400)}
+    if(body.userId!==user.id)return json({error:'The signed-in account changed. Save a copy, then reload.'},409);
     if(!Number.isInteger(body.version)||body.version<0||!body.values||Array.isArray(body.values)||typeof body.values!=='object'||Object.keys(body.values).some(k=>!accountKeys.includes(k))||Object.values(body.values).some(v=>typeof v!=='string')||JSON.stringify(body.values).length>1500000)return json({error:'Invalid account data or storage limit exceeded.'},400);
     for(const [k,v] of Object.entries(body.values)){if(k==='taskleaf-theme'||k==='taskleaf-sidebar-collapsed')continue;try{const data=JSON.parse(v);if(k==='taskleaf-v1'&&(!data||!Array.isArray(data.tasks)||!Array.isArray(data.cats)))throw Error()}catch{return json({error:'Invalid saved data.'},400)}}
     const version=await store.write(user.id,body.version,body.values);return version===null?json({error:'Your account changed in another tab or device. Reload to get the latest data.'},409):json({version});
