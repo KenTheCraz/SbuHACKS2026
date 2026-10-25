@@ -24,3 +24,4 @@
 [data-theme=dark] .section-tab:hover,[data-theme=dark] .nav:hover,[data-theme=dark] .rename-category:hover,[data-theme=dark] #extras-page .extras-subtabs button:hover,[data-theme=dark] .filters button:hover,[data-theme=dark] .view-toggle button:hover{background:#ffffff12;color:#fff}[data-theme=dark] .task-name-edit:hover{color:#fff;text-decoration-color:#fff}[data-theme=dark] #home-welcome-continue:hover{background:#fff;color:#242129}[data-theme=dark] #home-welcome-continue:focus-visible{outline-color:#fff}
 
 [data-theme=dark] .pond-person-name{color:#173e56;background:#e9f8ffb8;text-shadow:none}[data-theme=dark] .pond-water:after{box-shadow:inset 0 0 30px #4a9dc52b}[data-theme=dark] .pond-water-light{opacity:.75}
+[data-theme=dark] .top>strong,[data-theme=dark] #crumb{color:#fff}
