@@ -32,6 +32,7 @@ rows.push(
 rows.push(['about taskleaf','acerca de taskleaf','关于 taskleaf']);
 rows.push(['left the pond.','salió del estanque.','离开了池塘。']);
 rows.push(['joined the pond.','se unió al estanque.','加入了池塘。']);
+rows.push(['Task added successfully','Tarea añadida correctamente','任务添加成功']);
 const catalog=Object.fromEntries(rows.map(([en,es,zh])=>[en,{es,'zh-Hans':zh}]));
 function translate(text,language){if(language==='en')return text;if(catalog[text]?.[language])return catalog[text][language];const patterns=[
  [/^(\d+) unfinished tasks? due in the next 7 days\. (.*)$/, (m)=>language==='es'?`${m[1]} tareas pendientes en los próximos 7 días. ${translate(m[2],language)}`:`未来七天有 ${m[1]} 项待完成任务。${translate(m[2],language)}`],
