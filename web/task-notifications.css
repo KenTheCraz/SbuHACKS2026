@@ -1,0 +1,1 @@
+#toast{z-index:4000;max-width:calc(100vw - 32px);width:max-content;text-align:center;overflow-wrap:anywhere;box-shadow:0 6px 24px #19372524;pointer-events:none;animation:task-toast-in 180ms ease-out}@keyframes task-toast-in{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}@media(prefers-reduced-motion:reduce){#toast{animation:none}}
