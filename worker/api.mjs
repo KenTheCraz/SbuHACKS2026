@@ -8,7 +8,7 @@ export async function companion(request,env){
  if(request.headers.get('origin')!==new URL(request.url).origin)return json({error:'Request origin not allowed.'},403);
  if(!env.GROQ_API_KEY)return json({error:'Your AI connection is not configured.'},503);
  if(!request.headers.get('content-type')?.includes('application/json'))return json({error:'Expected JSON.'},415);
- const user='shared-companion',now=Date.now();let bucket=limits.get(user);if(!bucket||now-bucket.at>60000){bucket={at:now,n:0};limits.set(user,bucket)}if(++bucket.n>20)return json({error:'Please wait a minute before sending more messages.'},429);if(limits.size>1000)for(const [k,v]of limits)if(now-v.at>60000)limits.delete(k);
+ const user=env.ACCOUNT_ID||'shared-companion',now=Date.now();let bucket=limits.get(user);if(!bucket||now-bucket.at>60000){bucket={at:now,n:0};limits.set(user,bucket)}if(++bucket.n>20)return json({error:'Please wait a minute before sending more messages.'},429);if(limits.size>1000)for(const [k,v]of limits)if(now-v.at>60000)limits.delete(k);
  try{
  const raw=await request.text();if(raw.length>180000)return json({error:'Your task list is too large for one conversation. Shorten descriptions and try again.'},413);const data=JSON.parse(raw);
  if(typeof data.message!=='string'||!data.message.trim()||data.message.length>4000||!Array.isArray(data.tasks)||data.tasks.length>200||!Array.isArray(data.cats)||data.cats.length>100)return json({error:'Please send a message and a list of up to 200 tasks.'},400);

@@ -85,3 +85,13 @@ Uploads accept common browser-readable image formats (PNG, JPEG, WebP, GIF, BMP,
 Leaf chat now uses Groq (`openai/gpt-oss-20b`); AI extraction uses Groq vision (`qwen/qwen3.8-27b`). These are Groq model IDs and do not require an OpenAI API account. Optional server settings `GROQ_CHAT_MODEL` and `GROQ_VISION_MODEL` can override them. Keep `GROQ_API_KEY` in server environment secrets. No `APP_ACCESS_CODE` is needed. For an existing Render service, add `GROQ_API_KEY` manually in its Environment settings before redeploying; changing the repository does not transfer local secrets. The upload dialog lets users choose Leaf AI or on-device extraction and retry a selected file. AI extraction and chat are validated before any tasks are saved.
 
 Leaf chat and AI extraction are available to all visitors without an access code. The server keeps Groq credentials private and retains shared per-instance request limits (20 chat requests/minute, 40 extraction batches/minute), payload validation, and same-origin browser checks. These limits reduce abuse but are not a global spending cap; all visitors share the account quota. Old APP_ACCESS_CODE environment values are ignored and can be removed.
+
+## Accounts and persistence
+
+Username/password accounts are required. The Node server uses `DATABASE_URL` for PostgreSQL and initializes its account/session/data tables on startup. Set this to Render Postgres’s **Internal Database URL** in the same workspace and region. Passwords use salted scrypt hashes; sessions use random, hashed tokens in HttpOnly/Secure/SameSite cookies. No browser API key is needed.
+
+Tasks, categories, custom ordering, theme, weather preference, lock-in settings/history, timers, and recent Leaf conversation sync to the account. Conflicting edits from another device pause sync instead of overwriting data. Users can export unsaved data and reload. Existing browser tasks can be explicitly imported into a fresh account from Home. Login lasts up to 30 days; logout revokes the current session. Password recovery is not available in this first version.
+
+For local development only, set `LOCAL_AUTH_DB` to a SQLite file and run `npm run dev`. Production requires Postgres and never falls back to ephemeral files. Run `npm test` for account isolation, password/session checks, and conflict tests. The standalone Cloudflare worker does not provide the Node account layer; use the Node deployment for accounts.
+
+The prototype Render database expires November 24, 2026 UTC (November 23 in New York). Upgrade or migrate before expiration to keep using accounts.
