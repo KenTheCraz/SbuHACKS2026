@@ -37,6 +37,7 @@ rows.push(['Collapse Your space','Contraer tu espacio','折叠我的空间'],['E
 rows.push(['Made possible by community','Gracias a nuestra comunidad','因社区而成为可能'],['Special thanks','Agradecimientos especiales','特别感谢'],['Thank you to SBU Hacks and SBCS for bringing students together to build, learn, and create.','Gracias a SBU Hacks y SBCS por reunir a estudiantes para construir, aprender y crear.','感谢 SBU Hacks 和 SBCS 将学生们聚在一起，共同构建、学习与创造。']);
 const catalog=Object.fromEntries(rows.map(([en,es,zh])=>[en,{es,'zh-Hans':zh}]));
 function translate(text,language){if(language==='en')return text;if(catalog[text]?.[language])return catalog[text][language];const patterns=[
+ [/^welcome back, (.+)$/,(m)=>language==='es'?`qué bueno verte de nuevo, ${m[1]}`:`欢迎回来，${m[1]}`],
  [/^(\d+) unfinished tasks? due in the next 7 days\. (.*)$/, (m)=>language==='es'?`${m[1]} tareas pendientes en los próximos 7 días. ${translate(m[2],language)}`:`未来七天有 ${m[1]} 项待完成任务。${translate(m[2],language)}`],
  [/^Your fullest day has (\d+) tasks\.$/,(m)=>language==='es'?`Tu día más ocupado tiene ${m[1]} tareas.`:`最忙的一天有 ${m[1]} 项任务。`],
  [/^Session started: (.+)$/,(m)=>language==='es'?`Sesión iniciada: ${m[1]}`:`本次开始时间：${m[1]}`],
