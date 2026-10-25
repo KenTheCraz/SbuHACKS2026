@@ -115,3 +115,9 @@ Every push to the `taskleaf` branch runs `.github/workflows/deploy-render.yml`, 
 If the Render deploy hook is regenerated, update the repository secret. A successful workflow means Render accepted the deployment; check Render’s Deploys page for the build result.
 
 Ponds lobby lists only rooms with active members, plus one permanent **Quiet study** pond. Empty rooms are hidden rather than deleting their history; presence expiry also removes disconnected rooms from the list. An existing Quiet study room is adopted as the default when available. New chat messages briefly appear as small bubbles beside the sender’s leaf; historical messages do not replay as bubbles when joining. Navigation, settings, and dialogs use interruptible short transitions and respect reduced-motion preferences.
+
+## Fullscreen focus clocks
+
+Lock-ins has a Fullscreen clock action, with start/pause/resume and end-session controls in the focus view. Both this view and the Study timer use a centered clock and a small SVG steam train. The train runs while studying/counting down, pauses with a lock-in, and stops at countdown completion. Reduced-motion preferences disable decorative animation.
+
+Exit fullscreen or Escape returns to the app without stopping either timer. An active countdown has a Return to fullscreen action and inline remaining time. Supported browsers enter native fullscreen on a user action; other browsers use a full-viewport focus screen. Countdown completion keeps the existing ring notification.
