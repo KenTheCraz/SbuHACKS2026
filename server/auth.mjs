@@ -1,7 +1,7 @@
 import {randomBytes,randomUUID,scrypt as scryptCallback,timingSafeEqual,createHash} from 'node:crypto';
 import {promisify} from 'node:util';
 const scrypt=promisify(scryptCallback),ttl=30*86400000;
-export const accountKeys=['taskleaf-v1','taskleaf-theme','taskleaf-sidebar-collapsed','taskleaf-weather','taskleaf-lockins-v1','taskleaf-lockin-settings','taskleaf-countdown-v1','taskleaf-leaf-history'];
+export const accountKeys=['taskleaf-v1','taskleaf-theme','taskleaf-sidebar-collapsed','taskleaf-weather','taskleaf-lockins-v1','taskleaf-lockin-settings','taskleaf-countdown-v1','taskleaf-leaf-history','taskleaf-study-celebration-rotation','taskleaf-study-level'];
 export async function hashPassword(password,salt=randomBytes(16).toString('hex')){return salt+':'+Buffer.from(await scrypt(password,salt,64)).toString('hex')}
 export async function checkPassword(password,hash){const [salt,expected]=hash.split(':');const actual=await hashPassword(password,salt);return expected.length===128&&timingSafeEqual(Buffer.from(actual.split(':')[1],'hex'),Buffer.from(expected,'hex'))}
 const digest=token=>createHash('sha256').update(token).digest('hex');
