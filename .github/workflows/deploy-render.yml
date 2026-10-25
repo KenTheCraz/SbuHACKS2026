@@ -29,12 +29,5 @@ jobs:
           curl --fail --silent --show-error \
             --connect-timeout 10 --max-time 60 \
             --request POST "$RENDER_DEPLOY_HOOK_URL" \
-            --output "$RUNNER_TEMP/render-response.json"
-          python3 - "$RUNNER_TEMP/render-response.json" <<'PY'
-          import json, sys
-          with open(sys.argv[1]) as response:
-              content = response.read().strip()
-              data = json.loads(content) if content else {}
-          deploy_id = data.get('deploy', {}).get('id')
-          print('Render accepted the deployment' + (': ' + deploy_id if deploy_id else ' (queued).'))
-          PY
+            --output /dev/null
+          echo "Render accepted the deployment. Check Render Deploys for build status."
