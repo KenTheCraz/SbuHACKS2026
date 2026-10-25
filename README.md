@@ -107,3 +107,9 @@ The prototype Render database expires November 24, 2026 UTC (November 23 in New 
 Ponds uses the existing account database for public study rooms, membership, and room chat. Startup creates the `pond_rooms`, `pond_members`, and `pond_messages` tables. Each account can occupy one room at a time; a room holds 12 active members. Heartbeats keep a leaf present while the site remains open, including while using other Taskleaf tabs. Disconnected members disappear after 90 seconds. The room view polls for members and chat every three seconds and stops animation when hidden. It supports reduced motion and a Pause motion control.
 
 Room names and topics appear in the lobby. Chat is visible to room members and retains the latest 100 messages (the latest 60 are loaded when joining). Messages are plain text, limited to 500 characters, and rate limited. Joining, leaving, presence updates, and sending require authentication, same-origin requests, and the current account identity. Rooms and chat are shared records; personal tasks and study history remain private to their account.
+
+## Automatic production deployments
+
+Every push to the `taskleaf` branch runs `.github/workflows/deploy-render.yml`, which calls Render’s deploy hook using the GitHub Actions secret `RENDER_DEPLOY_HOOK_URL`. Manual workflow runs are also supported. Other branches do not change production. The hook stays in GitHub Secrets and is never committed. Native Render auto-deploy is disabled so the workflow is the single deploy trigger.
+
+If the Render deploy hook is regenerated, update the repository secret. A successful workflow means Render accepted the deployment; check Render’s Deploys page for the build result.

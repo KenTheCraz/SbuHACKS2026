@@ -2,6 +2,7 @@ services:
   - type: web
     name: taskleaf
     branch: taskleaf
+    autoDeployTrigger: off # GitHub Actions triggers deploys through the secret hook.
     runtime: node
     plan: free
     buildCommand: npm run build
