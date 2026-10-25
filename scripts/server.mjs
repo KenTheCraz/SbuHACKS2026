@@ -9,7 +9,7 @@ if(fs.existsSync('.env.local'))for(const line of fs.readFileSync('.env.local','u
 const local=process.argv.includes('--local'),port=Number(process.env.PORT||8765),host=local?'127.0.0.1':'0.0.0.0';
 const store=await createStore(local?process.env:{...process.env,LOCAL_AUTH_DB:undefined});
 const auth=createAuth(store,{secure:!local}),ponds=createPonds(store.ponds);
-const authPage=fs.readFileSync(new URL('../web/auth.html',import.meta.url),'utf8');
+const authPage=fs.readFileSync(new URL('../web/auth.html',import.meta.url),'utf8').replace('</head>','<style>'+fs.readFileSync(new URL('../web/language.css',import.meta.url),'utf8')+'</style></head>').replace('</body>','<script>'+fs.readFileSync(new URL('../web/language-core.js',import.meta.url),'utf8')+'</script><script>'+fs.readFileSync(new URL('../web/language.js',import.meta.url),'utf8')+'</script></body>');
 const accountClient=fs.readFileSync(new URL('../web/account-store.js',import.meta.url),'utf8');
 const secureHeaders={'x-content-type-options':'nosniff','referrer-policy':'same-origin','x-frame-options':'DENY','cache-control':'no-store'};
 http.createServer(async(req,res)=>{try{

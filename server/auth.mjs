@@ -1,7 +1,7 @@
 import {randomBytes,randomUUID,scrypt as scryptCallback,timingSafeEqual,createHash} from 'node:crypto';
 import {promisify} from 'node:util';
 const scrypt=promisify(scryptCallback),ttl=30*86400000;
-export const accountKeys=['taskleaf-grades-v1','taskleaf-v1','taskleaf-theme','taskleaf-sidebar-collapsed','taskleaf-weather','taskleaf-lockins-v1','taskleaf-lockin-settings','taskleaf-countdown-v1','taskleaf-leaf-history','taskleaf-study-celebration-rotation','taskleaf-study-level'];
+export const accountKeys=['taskleaf-language','taskleaf-grades-v1','taskleaf-v1','taskleaf-theme','taskleaf-sidebar-collapsed','taskleaf-weather','taskleaf-lockins-v1','taskleaf-lockin-settings','taskleaf-countdown-v1','taskleaf-leaf-history','taskleaf-study-celebration-rotation','taskleaf-study-level'];
 export async function hashPassword(password,salt=randomBytes(16).toString('hex')){return salt+':'+Buffer.from(await scrypt(password,salt,64)).toString('hex')}
 export async function checkPassword(password,hash){const [salt,expected]=hash.split(':');const actual=await hashPassword(password,salt);return expected.length===128&&timingSafeEqual(Buffer.from(actual.split(':')[1],'hex'),Buffer.from(expected,'hex'))}
 const digest=token=>createHash('sha256').update(token).digest('hex');
@@ -39,7 +39,7 @@ export function createAuth(store,{secure=true}={}){
     let body;try{body=await request.json()}catch{return json({error:'Invalid account data.'},400)}
     if(body.userId!==user.id)return json({error:'The signed-in account changed. Save a copy, then reload.'},409);
     if(!Number.isInteger(body.version)||body.version<0||!body.values||Array.isArray(body.values)||typeof body.values!=='object'||Object.keys(body.values).some(k=>!accountKeys.includes(k))||Object.values(body.values).some(v=>typeof v!=='string')||JSON.stringify(body.values).length>1500000)return json({error:'Invalid account data or storage limit exceeded.'},400);
-    for(const [k,v] of Object.entries(body.values)){if(k==='taskleaf-theme'||k==='taskleaf-sidebar-collapsed')continue;try{const data=JSON.parse(v);if(k==='taskleaf-v1'&&(!data||!Array.isArray(data.tasks)||!Array.isArray(data.cats)))throw Error()}catch{return json({error:'Invalid saved data.'},400)}}
+    for(const [k,v] of Object.entries(body.values)){if(k==='taskleaf-theme'||k==='taskleaf-sidebar-collapsed'||k==='taskleaf-language')continue;try{const data=JSON.parse(v);if(k==='taskleaf-v1'&&(!data||!Array.isArray(data.tasks)||!Array.isArray(data.cats)))throw Error()}catch{return json({error:'Invalid saved data.'},400)}}
     const version=await store.write(user.id,body.version,body.values);return version===null?json({error:'Your account changed in another tab or device. Reload to get the latest data.'},409):json({version});
    }
   }

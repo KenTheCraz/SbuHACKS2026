@@ -1,0 +1,5 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import {accountKeys} from '../server/auth.mjs';
+const ctx={};vm.createContext(ctx);vm.runInContext(fs.readFileSync('web/language-core.js','utf8'),ctx);const t=ctx.TaskleafLanguage.translate;
+assert.equal(t('Add details','es'),'Añadir detalles');assert.equal(t('Add details','zh-Hans'),'添加详情');assert.equal(t('All tasks','en'),'All tasks');assert.equal(t('An original student task','es'),'An original student task');assert.equal(t('Session started: 10:30','es'),'Sesión iniciada: 10:30');assert.match(t('A break suggestion every 120 min · 20 min breaks','zh-Hans'),/120/);assert.match(t('You’ve studied 30 minutes more than yesterday. Nicely done!','es'),/30/);assert.ok(accountKeys.includes('taskleaf-language'));
+for(const value of Object.values(ctx.TaskleafLanguage.catalog)){assert.ok(value.es);assert.ok(value['zh-Hans'])}
+console.log('Spanish/Chinese interface translations, dynamic values, English fallback, and account language persistence key passed.');
