@@ -1,0 +1,19 @@
+import assert from 'node:assert/strict';import {randomUUID} from 'node:crypto';import {createStore} from '../server/store.mjs';import {createPonds} from '../server/ponds.mjs';import {pondPresenceMs} from '../server/pond-store.mjs';
+const store=await createStore({LOCAL_AUTH_DB:':memory:'}),rooms=store.ponds,users=[];for(let i=0;i<15;i++){const user={id:randomUUID(),username:'student_'+i};await store.register(user.id,user.username,'unused-test-hash');users.push(user)}
+const [a,b,c]=users,now=Date.now(),first=await rooms.create(a.id,'Calculus pond','Derivatives',now),second=await rooms.create(b.id,'Reading pond','Quiet reading',now);
+assert.equal((await rooms.list(a.id,now)).currentRoomId,first);assert.equal((await rooms.list(a.id,now)).rooms.find(r=>r.id===first).members,1);
+await assert.rejects(rooms.snapshot(c.id,first,now),e=>e.status===403);await rooms.join(b.id,first,now);let snapshot=await rooms.snapshot(a.id,first,now);assert.equal(snapshot.members.length,2);assert.equal((await rooms.list(b.id,now)).rooms.find(r=>r.id===second).members,0);
+const message=randomUUID();await rooms.message(a.id,first,message,'Hello <script>literal text</script>',now);await rooms.message(a.id,first,message,'Retry',now+1);snapshot=await rooms.snapshot(b.id,first,now+1);assert.equal(snapshot.messages.length,1);assert.equal(snapshot.messages[0].body,'Hello <script>literal text</script>');assert.equal(snapshot.messages[0].username,a.username);
+await assert.rejects(rooms.message(a.id,first,randomUUID(),'Too soon',now+100),e=>e.status===429);await assert.rejects(rooms.message(c.id,first,randomUUID(),'Outside',now),e=>e.status===403);
+await rooms.join(b.id,second,now+1000);await rooms.leave(b.id,first);assert.equal((await rooms.list(b.id,now+1000)).currentRoomId,second);await assert.rejects(rooms.heartbeat(b.id,first,now+1000),e=>e.status===403);
+for(let i=2;i<13;i++)await rooms.join(users[i].id,first,now+2000);assert.equal((await rooms.snapshot(a.id,first,now+2000)).members.length,12);await assert.rejects(rooms.join(users[13].id,first,now+2000),e=>e.status===409);
+await rooms.join(users[13].id,first,now+pondPresenceMs+3000);snapshot=await rooms.snapshot(users[13].id,first,now+pondPresenceMs+3000);assert.equal(snapshot.members.length,1);assert.equal(snapshot.messages.length,1);await rooms.leave(users[13].id,first);await assert.rejects(rooms.snapshot(users[13].id,first,now+pondPresenceMs+4000),e=>e.status===403);
+const api=createPonds(rooms),request=(path,body,origin='https://taskleaf.test',method='POST')=>new Request('https://taskleaf.test/api/ponds'+path,{method,headers:{origin,'content-type':'application/json'},...(method==='GET'?{}:{body:JSON.stringify(body)})});
+assert.equal((await api(request('',null,'https://taskleaf.test','GET'),null)).status,401);
+assert.equal((await api(request('',{userId:a.id,name:'new'},'https://evil.test'),a)).status,403);
+assert.equal((await api(request('',{userId:b.id,name:'new'}),a)).status,409);
+assert.equal((await api(request('',{userId:a.id,name:' '.repeat(4)}),a)).status,400);
+let result=await api(request('',{userId:a.id,name:'API pond',topic:'Study'}),a);assert.equal(result.status,201);const apiRoom=(await result.json()).roomId;
+assert.equal((await api(request('/'+apiRoom+'/messages',{userId:a.id,id:randomUUID(),body:'x'.repeat(501)}),a)).status,400);
+await rooms.join(b.id,apiRoom);assert.equal((await api(request('/'+apiRoom+'/messages',{userId:b.id,id:randomUUID(),body:'A shared goal'}),b)).status,201);result=await api(request('/'+apiRoom,null,'https://taskleaf.test','GET'),b);assert.equal((await result.json()).messages[0].body,'A shared goal');
+await store.close();console.log('Ponds creation, room switching, shared chat, idempotent sends, membership permissions, capacity, stale presence, CSRF, account identity, message validation, and rate limits passed.');

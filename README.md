@@ -101,3 +101,9 @@ Tasks, categories, custom ordering, theme, weather preference, lock-in settings/
 For local development only, set `LOCAL_AUTH_DB` to a SQLite file and run `npm run dev`. Production requires Postgres and never falls back to ephemeral files. Run `npm test` for account isolation, password/session checks, and conflict tests. The standalone Cloudflare worker does not provide the Node account layer; use the Node deployment for accounts.
 
 The prototype Render database expires November 24, 2026 UTC (November 23 in New York). Upgrade or migrate before expiration to keep using accounts.
+
+## Ponds study rooms
+
+Ponds uses the existing account database for public study rooms, membership, and room chat. Startup creates the `pond_rooms`, `pond_members`, and `pond_messages` tables. Each account can occupy one room at a time; a room holds 12 active members. Heartbeats keep a leaf present while the site remains open, including while using other Taskleaf tabs. Disconnected members disappear after 90 seconds. The room view polls for members and chat every three seconds and stops animation when hidden. It supports reduced motion and a Pause motion control.
+
+Room names and topics appear in the lobby. Chat is visible to room members and retains the latest 100 messages (the latest 60 are loaded when joining). Messages are plain text, limited to 500 characters, and rate limited. Joining, leaving, presence updates, and sending require authentication, same-origin requests, and the current account identity. Rooms and chat are shared records; personal tasks and study history remain private to their account.

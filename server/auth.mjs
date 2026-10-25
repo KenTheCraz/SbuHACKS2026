@@ -32,7 +32,7 @@ export function createAuth(store,{secure=true}={}){
   }
   const user=await current(request);if(!user)return json({error:'Please log in to continue.'},401);
   if(path==='/api/account/session'&&request.method==='GET')return json({user});
-  if(path==='/api/account/logout'&&request.method==='POST'){const t=token(request);if(t)await store.revoke(digest(t));return json({ok:true},200,{'set-cookie':cookie('',0)})}
+  if(path==='/api/account/logout'&&request.method==='POST'){const t=token(request);if(t)await store.revoke(digest(t));await store.ponds?.leave(user.id);return json({ok:true},200,{'set-cookie':cookie('',0)})}
   if(path==='/api/account/data'){
    if(request.method==='GET')return json(await store.read(user.id));
    if(request.method==='PUT'){

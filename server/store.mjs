@@ -1,4 +1,5 @@
 import postgres from 'postgres';
+import {createPondStore} from './pond-store.mjs';
 export async function createStore(env=process.env){
  if(env.DATABASE_URL){
   const sql=postgres(env.DATABASE_URL,{max:5,connect_timeout:10,idle_timeout:20,ssl:env.DATABASE_SSL==='require'?'require':undefined});
@@ -7,6 +8,7 @@ export async function createStore(env=process.env){
   await sql`CREATE INDEX IF NOT EXISTS leaf_session_expiry ON leaf_sessions(expires_at)`;
   await sql`CREATE TABLE IF NOT EXISTS leaf_data (user_id text PRIMARY KEY REFERENCES leaf_users(id) ON DELETE CASCADE,version integer NOT NULL DEFAULT 0,values_json jsonb NOT NULL DEFAULT '{}'::jsonb)`;
   return {
+   ponds:await createPondStore({sql}),
    async user(username){return (await sql`SELECT id,username,password_hash FROM leaf_users WHERE username=${username}`)[0]},
    async register(id,username,hash){try{await sql.begin(async tx=>{await tx`INSERT INTO leaf_users (id,username,password_hash) VALUES (${id},${username},${hash})`;await tx`INSERT INTO leaf_data(user_id) VALUES (${id})`});return true}catch(e){if(e.code==='23505')return false;throw e}},
    async session(hash){return (await sql`SELECT u.id,u.username FROM leaf_sessions s JOIN leaf_users u ON s.user_id=u.id WHERE s.token_hash=${hash} AND s.expires_at>${Date.now()}`)[0]},
@@ -19,6 +21,7 @@ export async function createStore(env=process.env){
  }
  // Explicit local-only development/test storage; never an ephemeral production fallback.
  if(env.LOCAL_AUTH_DB){const {DatabaseSync}=await import('node:sqlite');const db=new DatabaseSync(env.LOCAL_AUTH_DB);db.exec('PRAGMA foreign_keys=ON; CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY,username TEXT UNIQUE,password_hash TEXT); CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id),expires_at INTEGER); CREATE TABLE IF NOT EXISTS data(user_id TEXT PRIMARY KEY REFERENCES users(id),version INTEGER DEFAULT 0,values_json TEXT DEFAULT \'{}\');');return {
+  ponds:await createPondStore({db}),
   async user(name){return db.prepare('SELECT * FROM users WHERE username=?').get(name)},
   async register(id,name,hash){try{db.exec('BEGIN');db.prepare('INSERT INTO users VALUES(?,?,?)').run(id,name,hash);db.prepare('INSERT INTO data(user_id) VALUES(?)').run(id);db.exec('COMMIT');return true}catch(e){db.exec('ROLLBACK');if(e.code?.includes('CONSTRAINT')||e.message.includes('UNIQUE'))return false;throw e}},
   async session(hash){return db.prepare('SELECT u.id,u.username FROM sessions s JOIN users u ON s.user_id=u.id WHERE token_hash=? AND expires_at>?').get(hash,Date.now())},

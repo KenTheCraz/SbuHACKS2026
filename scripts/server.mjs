@@ -1,13 +1,14 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import handler from '../dist/server/index.js';
+import {createPonds} from '../server/ponds.mjs';
 import {createStore} from '../server/store.mjs';
 import {createAuth,accountKeys,json} from '../server/auth.mjs';
 // Load optional local settings without overriding hosting-provided environment values.
 if(fs.existsSync('.env.local'))for(const line of fs.readFileSync('.env.local','utf8').split(/\r?\n/)){const match=line.match(/^\s*([A-Z_][A-Z_0-9]*)\s*=\s*(.*?)\s*$/);if(match&&process.env[match[1]]===undefined)process.env[match[1]]=match[2].replace(/^(["'])(.*)\1$/,'$2')}
 const local=process.argv.includes('--local'),port=Number(process.env.PORT||8765),host=local?'127.0.0.1':'0.0.0.0';
 const store=await createStore(local?process.env:{...process.env,LOCAL_AUTH_DB:undefined});
-const auth=createAuth(store,{secure:!local});
+const auth=createAuth(store,{secure:!local}),ponds=createPonds(store.ponds);
 const authPage=fs.readFileSync(new URL('../web/auth.html',import.meta.url),'utf8');
 const accountClient=fs.readFileSync(new URL('../web/account-store.js',import.meta.url),'utf8');
 const secureHeaders={'x-content-type-options':'nosniff','referrer-policy':'same-origin','x-frame-options':'DENY','cache-control':'no-store'};
@@ -25,7 +26,7 @@ http.createServer(async(req,res)=>{try{
   const user=await auth.current(request);
   if(!user){response=path.startsWith('/api/')?json({error:'Please log in to continue.'},401):new Response(request.method==='HEAD'?null:authPage,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}})}
   else {
-   response=await handler.fetch(request,{GROQ_API_KEY:process.env.GROQ_API_KEY,GROQ_CHAT_MODEL:process.env.GROQ_CHAT_MODEL,GROQ_VISION_MODEL:process.env.GROQ_VISION_MODEL,ACCOUNT_ID:user.id});
+   response=await ponds(request,user)||await handler.fetch(request,{GROQ_API_KEY:process.env.GROQ_API_KEY,GROQ_CHAT_MODEL:process.env.GROQ_CHAT_MODEL,GROQ_VISION_MODEL:process.env.GROQ_VISION_MODEL,ACCOUNT_ID:user.id});
    if((path==='/'||path==='/index.html')&&request.method==='GET'){
     const snapshot=await store.read(user.id);const bootstrap=JSON.stringify({...snapshot,user,keys:accountKeys}).replaceAll('<','\\u003c');
     const html=(await response.text()).replace('<head>','<head><script>window.accountBootstrap='+bootstrap+';'+accountClient+'</script>');
